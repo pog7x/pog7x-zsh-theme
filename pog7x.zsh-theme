@@ -83,10 +83,10 @@ if [ ! -n "${POG7X_NVM_BG+1}" ]; then
   POG7X_NVM_BG=green
 fi
 if [ ! -n "${POG7X_NVM_FG+1}" ]; then
-  POG7X_NVM_FG=white
+  POG7X_NVM_FG=black
 fi
 if [ ! -n "${POG7X_NVM_PREFIX+1}" ]; then
-  POG7X_NVM_PREFIX="⬡ "
+  POG7X_NVM_PREFIX="n⬢de "
 fi
 
 # AWS
@@ -120,6 +120,9 @@ if [ ! -n "${POG7X_GO_FG+1}" ]; then
 fi
 if [ ! -n "${POG7X_GO_PREFIX+1}" ]; then
   POG7X_GO_PREFIX="go"
+fi
+if [ ! -n "${POG7X_GO_SUFFIX+1}" ]; then
+  POG7X_GO_SUFFIX="💨"
 fi
 
 # Rust
@@ -448,9 +451,11 @@ prompt_perl() {
 # Go
 prompt_go() {
   setopt extended_glob
-  if [[ (-f *.go(#qN) || -d Godeps || -f glide.yaml) ]]; then
-    if command -v go > /dev/null 2>&1; then
-      prompt_segment $POG7X_GO_BG $POG7X_GO_FG $POG7X_GO_PREFIX" $(go version | grep --colour=never -oE '[[:digit:]].[[:digit:]]+')"
+  if [[ (-f *.go(#qN) || -d Godeps || -f glide.yaml || -f go.mod) ]]; then
+    if [[ -f go.mod ]]; then
+      prompt_segment $POG7X_GO_BG $POG7X_GO_FG "$(grep -m 1 go go.mod | cut -d\  -f2) "$POG7X_GO_SUFFIX
+    elif command -v go > /dev/null 2>&1; then
+      prompt_segment $POG7X_GO_BG $POG7X_GO_FG "$(go version | grep --colour=never -oE '[[:digit:]].[[:digit:]]+') "$POG7X_GO_SUFFIX
     fi
   fi
 }
@@ -491,17 +496,19 @@ prompt_virtualenv() {
 
 # NVM: Node version manager
 prompt_nvm() {
-  local nvm_prompt
-  if type nvm >/dev/null 2>&1; then
-    nvm_prompt=$(nvm current 2>/dev/null)
-    [[ "${nvm_prompt}x" == "x" || "${nvm_prompt}" == "system" ]] && return
-  elif type node >/dev/null 2>&1; then
-    nvm_prompt="$(node --version)"
-  else
-    return
+  if [ -e package.json ]; then
+    local nvm_prompt
+    if type nvm >/dev/null 2>&1; then
+      nvm_prompt=$(nvm current 2>/dev/null)
+      [[ "${nvm_prompt}x" == "x" || "${nvm_prompt}" == "system" ]] && return
+    elif type node >/dev/null 2>&1; then
+      nvm_prompt="$(node --version)"
+    else
+      return
+    fi
+    nvm_prompt=${nvm_prompt}
+    prompt_segment $POG7X_NVM_BG $POG7X_NVM_FG $POG7X_NVM_PREFIX$nvm_prompt
   fi
-  nvm_prompt=${nvm_prompt}
-  prompt_segment $POG7X_NVM_BG $POG7X_NVM_FG $POG7X_NVM_PREFIX$nvm_prompt
 }
 
 #AWS Profile
