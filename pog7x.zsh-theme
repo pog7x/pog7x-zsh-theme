@@ -453,7 +453,7 @@ prompt_go() {
   setopt extended_glob
   if [[ (-f *.go(#qN) || -d Godeps || -f glide.yaml || -f go.mod) ]]; then
     if [[ -f go.mod ]]; then
-      prompt_segment $POG7X_GO_BG $POG7X_GO_FG "$(grep -m 1 go go.mod | cut -d\  -f2) "$POG7X_GO_SUFFIX
+      prompt_segment $POG7X_GO_BG $POG7X_GO_FG "$(grep -oE 'go [[:digit:]].[[:digit:]]+' go.mod | cut -d\  -f2) "$POG7X_GO_SUFFIX
     elif command -v go > /dev/null 2>&1; then
       prompt_segment $POG7X_GO_BG $POG7X_GO_FG "$(go version | grep --colour=never -oE '[[:digit:]].[[:digit:]]+') "$POG7X_GO_SUFFIX
     fi
